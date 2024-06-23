@@ -8,11 +8,29 @@
             body {
                 font-family: Arial, sans-serif;
                 text-align: center;
+                background: url('https://pds.joongang.co.kr/news/component/htmlphoto_mmdata/202303/30/e2fe7157-1b47-4466-9043-decc7aae7685.jpg')
+                    no-repeat center center fixed;
+                background-size: cover;
+                background-attachment: fixed;
+                background-color: rgba(255, 255, 255, 0.2); /* 배경 이미지에 투명도 추가 */
+                background-blend-mode: lighten; /* 투명 배경색을 더 밝게 조정 */
+                height: 100vh;
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
             }
-            #canvas,
-            #graph {
+            #content {
+                background-color: rgba(255, 255, 255, 0.2); /* 캔버스 영역의 투명도 추가 */
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            }
+            canvas {
                 border: 1px solid black;
                 margin: 10px;
+                background-color: white;
             }
             #info {
                 margin-top: 10px;
@@ -22,13 +40,15 @@
         <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </head>
     <body>
-        <h1>후지산의 형성과 침식</h1>
-        <canvas id="canvas" width="600" height="400"></canvas>
-        <canvas id="graph" width="600" height="300"></canvas>
-        <div id="info"></div>
-        <div id="equation"></div>
-        <button onclick="startFormation()">형성 시작</button>
-        <button onclick="startErosion()">침식 시작</button>
+        <div id="content">
+            <h1>후지산의 형성과 침식</h1>
+            <canvas id="canvas" width="600" height="400"></canvas>
+            <canvas id="graph" width="600" height="300"></canvas>
+            <div id="info"></div>
+            <div id="equation"></div>
+            <button onclick="startFormation()">형성 시작</button>
+            <button onclick="startErosion()">침식 시작</button>
+        </div>
 
         <script>
             const canvas = document.getElementById('canvas');
