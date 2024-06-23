@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>후지산의 형성과 침식</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                text-align: center;
+            }
+            #canvas,
+            #graph {
+                border: 1px solid black;
+                margin: 10px;
+            }
+            #info {
+                margin-top: 10px;
+            }
+        </style>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </head>
+    <body>
+        <h1>후지산의 형성과 침식</h1>
+        <canvas id="canvas" width="600" height="400"></canvas>
+        <canvas id="graph" width="600" height="300"></canvas>
+        <div id="info"></div>
+        <div id="equation"></div>
+        <button onclick="startFormation()">형성 시작</button>
+        <button onclick="startErosion()">침식 시작</button>
+
+        <script>
+            const canvas = document.getElementById('canvas');
+            const graph = document.getElementById('graph');
+            const ctx = canvas.getContext('2d');
+            const graphCtx = graph.getContext('2d');
+            const info = document.getElementById('info');
+            const equation = document.getElementById('equation');
+
+            const a = canvas.width / 2;
+            const k = 0.0001;
+            let h = 0;
+            const H = 300;
+            const lambda = 0.0005;
+            let t = 0;
+            let animationFrameId;
+            const dataPoints = [];
+
+            function gaussian(x, t) {
+                return h * Math.exp(-k * (x - a) ** 2);
+            }
+
+            function drawMountain() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.beginPath();
+                for (let x = 0; x < canvas.width; x++) {
+                    const y = canvas.height - gaussian(x, t);
+                    if (x === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.stroke();
+            }
+
+            function drawGraphAxes() {
+                graphCtx.beginPath();
+                graphCtx.moveTo(0, graph.height);
+                graphCtx.lineTo(graph.width, graph.height);
+                graphCtx.moveTo(0, 0);
+                graphCtx.lineTo(0, graph.height);
+                graphCtx.strokeStyle = '#000000';
+                graphCtx.stroke();
+
+                // x축 눈금
+                for (let i = 0; i <= graph.width; i += 50) {
+                    graphCtx.moveTo(i, graph.height);
+                    graphCtx.lineTo(i, graph.height - 5);
+                    graphCtx.fillText(i, i, graph.height - 10);
+                }
+
+                // y축 눈금
+                for (let i = 0; i <= H; i += 50) {
+                    let y = graph.height - (i / H) * graph.height;
+                    graphCtx.moveTo(0, y);
+                    graphCtx.lineTo(5, y);
+                    graphCtx.fillText(i, 10, y + 5);
+                }
+                graphCtx.stroke();
+            }
+
+            function drawGraph() {
+                graphCtx.clearRect(0, 0, graph.width, graph.height);
+                drawGraphAxes();
+                graphCtx.beginPath();
+                for (let i = 0; i < dataPoints.length; i++) {
+                    const x = i;
+                    const y = graph.height - (dataPoints[i] / H) * graph.height;
+                    if (i === 0) {
+                        graphCtx.moveTo(x, y);
+                    } else {
+                        graphCtx.lineTo(x, y);
+                    }
+                }
+                graphCtx.stroke();
+            }
+
+            function updateHeightFormation() {
+                h = H * (1 - Math.exp(-0.01 * t));
+                t += 1;
+                drawMountain();
+                dataPoints.push(h);
+                if (dataPoints.length > graph.width) {
+                    dataPoints.shift();
+                }
+                drawGraph();
+                info.textContent = `현재 높이: ${h.toFixed(2)}, 수렴 값: ${H}`;
+                equation.innerHTML = `\\[ h(t) = ${H} \\left(1 - e^{-0.01 t}\\right) \\]`;
+                MathJax.typeset();
+                animationFrameId = requestAnimationFrame(updateHeightFormation);
+            }
+
+            function updateHeightErosion() {
+                h = H * Math.exp(-lambda * t);
+                t += 1;
+                drawMountain();
+                dataPoints.push(h);
+                if (dataPoints.length > graph.width) {
+                    dataPoints.shift();
+                }
+                drawGraph();
+                info.textContent = `현재 높이: ${h.toFixed(2)}, 수렴 값: 0`;
+                equation.innerHTML = `\\[ h(t) = ${H} e^{-0.0005 t} \\]`;
+                MathJax.typeset();
+                animationFrameId = requestAnimationFrame(updateHeightErosion);
+            }
+
+            function startFormation() {
+                cancelAnimationFrame(animationFrameId);
+                t = 0;
+                h = 0;
+                dataPoints.length = 0;
+                animationFrameId = requestAnimationFrame(updateHeightFormation);
+            }
+
+            function startErosion() {
+                cancelAnimationFrame(animationFrameId);
+                t = 0;
+                h = H;
+                dataPoints.length = 0;
+                animationFrameId = requestAnimationFrame(updateHeightErosion);
+            }
+
+            drawMountain();
+            drawGraph();
+            info.textContent = `현재 높이: ${h.toFixed(2)}, 수렴 값: ${H}`;
+            equation.innerHTML = `\\[ h(t) = H \\left(1 - e^{-0.01 t}\\right) \\]`;
+            MathJax.typeset();
+        </script>
+    </body>
+</html>
